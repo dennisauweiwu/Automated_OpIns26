@@ -38,7 +38,7 @@ class CameraWorker(QObject):
             self.frame_ready.emit(frame)
             
             self.frame_counter += 1
-            time.sleep(1/15) # Simulate 15 FPS 
+            time.sleep(1/5) # Simulate 15 FPS 
 
     def stop(self):
         self._is_running = False
