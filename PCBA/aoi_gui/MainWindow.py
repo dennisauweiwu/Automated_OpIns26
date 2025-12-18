@@ -139,20 +139,35 @@ class MainWindow(QMainWindow):
         sidebar_layout.addWidget(self._create_stats_group())
         sidebar_layout.addWidget(self._create_control_group())
 
-        # C. Reporting & Status Buttons
-        self.report_button = QPushButton("Capture & Export Report (.xlsx)")
+        # C. Reporting & Action Buttons
+        self.report_button = QPushButton("Export Report (.xlsx)")
         self.report_button.setObjectName("reportButton")
-        self.report_button.setFixedHeight(40)
+        # Use minimum height to avoid vertical clipping of text descenders
+        self.report_button.setMinimumHeight(44)
         sidebar_layout.addWidget(self.report_button)
+
+        # New action: Capture & Analyze (placed beneath Export)
+        self.capture_button = QPushButton("Capture and Analyze")
+        self.capture_button.setObjectName("captureButton")
+        self.capture_button.setMinimumHeight(44)
+        self.capture_button.clicked.connect(self._on_capture_and_analyze)
+        sidebar_layout.addWidget(self.capture_button)
         
         # Spacer
         sidebar_layout.addStretch(1) 
         
         self.setStatusBar(QStatusBar(self))
 
+    def _on_capture_and_analyze(self):
+        """Placeholder: trigger a single capture and analysis cycle (mock)."""
+        # Show quick feedback in the status bar; integration with real capture can replace this
+        self.statusBar().showMessage("Capture & Analyze triggered (mock)", 3000)
+
     def _create_stats_group(self):
         stats_group = QGroupBox("Inspection Statistics")
-        main_layout = QVBoxLayout() 
+        main_layout = QVBoxLayout()
+        main_layout.setContentsMargins(12, 12, 12, 12)
+        main_layout.setSpacing(8)
 
         # 1. BIG Dynamic Status Indicator
         self.status_indicator = QLabel("LOADING...")
@@ -170,6 +185,9 @@ class MainWindow(QMainWindow):
 
         # 2. Add a QFormLayout specifically for the detailed metrics (Rows)
         form_layout = QFormLayout()
+        form_layout.setContentsMargins(0, 6, 0, 0)
+        form_layout.setHorizontalSpacing(12)
+        form_layout.setVerticalSpacing(8)
         
         self.defects_label = QLabel("0")
         self.type_label = QLabel("N/A")
@@ -189,6 +207,9 @@ class MainWindow(QMainWindow):
     def _create_control_group(self):
         control_group = QGroupBox("Hardware/Light Controls")
         layout = QFormLayout()
+        layout.setContentsMargins(4, 6, 4, 6)
+        layout.setHorizontalSpacing(12)
+        layout.setVerticalSpacing(8)
         
         # Dummy Slider for Brightness
         self.brightness_slider = QSlider(Qt.Horizontal)

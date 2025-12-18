@@ -11,113 +11,137 @@ if __name__ == '__main__':
     # UI font 
     app.setStyleSheet("""
         /* --- 1. Base Widget (Global) --- */
+        /* Main Background: deep desaturated Navy/Teal (#001B26) */
         QWidget {
-            background-color: #17181A; /* Lightened base (approx +8%) */
-            color: #E8E8E8;            /* High-contrast near-white text */
+            background-color: #001B26;
+            color: #E0F7FA;            /* Primary text */
             font-family: Avenir;
             font-size: 10pt;
         }
 
         /* --- 2. QGroupBox (Container Styles) --- */
+        /* Secondary Surface: panel blue (#002D3A) */
         QGroupBox {
-            border: 1px solid #34373A;
-            border-radius: 6px;
+            border: 1px solid #0B2530; /* thin, slightly lighter than background */
+            border-radius: 6px; /* soft rounded corners */
             margin-top: 25px;
-            padding-top: 18px;
+            padding: 12px; /* consistent internal padding */
+            padding-top: 18px; /* preserve title spacing */
             font-weight: normal;
-            background-color: #1A1B1D;
+            background-color: #002D3A;
         }
         QGroupBox::title {
             subcontrol-origin: margin;
             subcontrol-position: top left;
             padding: 0 8px;
-            color: #9AA0A6; /* Muted title text */
+            color: #B0BEC5; /* Control icons / muted text */
             font-size: 9pt;
+        }
+
+        /* Ensure consistent rounded corners on common controls */
+        QPushButton, QLineEdit, QComboBox {
+            border-radius: 6px;
+        }
+
+        /* Small padding for labels to keep spacing uniform between labels and inputs */
+        QLabel {
+            padding: 2px 6px 2px 6px;
         }
 
         /* --- 3. QLabel#StatusIndicator --- */
         QLabel#StatusIndicator {
             font-size: 18pt;
             font-weight: bold;
-            color: #E8E8E8;
-            padding: 8px;
-            border: 2px solid #363A3D;
+            color: #E0F7FA;
+            padding: 8px 12px;
+            border: 1px solid #0B2530; /* thin border */
             border-radius: 6px;
-            background-color: #33373A;
+            background-color: #002D3A;
             min-width: 140px;
         }
 
         /* Utility states for programmatic toggling via QLabel[status="..."] */
         QLabel#StatusIndicator[status="loading"] {
-            color: #9AA0A6;
-            background-color: #33373A;
-            border-color: #363A3D;
+            color: #B0BEC5;
+            background-color: #002D3A;
+            border-color: #0B2530;
         }
+        /* Action Green for PASS */
         QLabel#StatusIndicator[status="pass"] {
-            color: #001712; /* dark text for legibility on green */
-            background-color: #00BFA5;
-            border-color: #009E87;
+            color: #001712;
+            background-color: #6DA06F; /* Action Green */
+            border-color: #5b8a60;
         }
         QLabel#StatusIndicator[status="fail"] {
             color: #FFFFFF;
-            background-color: #FF3B30;
-            border-color: #CC3328;
+            background-color: #C94C40; /* desaturated red to match UI */
+            border-color: #A63F36;
         }
 
         /* --- 4. QPushButton (Interactive Elements) --- */
+        /* Default buttons use Secondary Surface, icons use cool grey */
         QPushButton {
-            background-color: #272A2C;
-            border: 1px solid #35393C;
-            color: #E8E8E8;
-            padding: 10px 14px;
+            background-color: #002D3A;
+            border: 1px solid #1D4B5E; /* Secondary Accent */
+            color: #E0F7FA;
+            padding: 12px 14px; /* increase vertical padding to avoid clipping descenders */
             border-radius: 6px;
             min-width: 80px;
+            min-height: 44px; /* enforce a comfortable line-height */
             font-weight: 500;
         }
+
+        /* ensure labels have enough vertical padding for descenders */
+        QLabel {
+            padding: 4px 6px;
+        }
         QPushButton:hover {
-            background-color: #2F4C4F; /* subtle lift */
-            border-color: #00BFA5;
+            background-color: #31A3B8; /* Primary Accent */
+            border-color: #31A3B8;
+            color: #001712;
         }
         QPushButton:pressed {
-            background-color: #00BFA5;
-            border-color: #009E87;
+            background-color: #31A3B8;
+            border-color: #1D4B5E;
             color: #001712;
         }
 
-        /* Primary report action (set objectName: reportButton) */
+        /* Primary report action (set objectName: reportButton) -> use Primary Accent */
         QPushButton#reportButton {
-            background-color: #00BFA5;
+            background-color: #31A3B8;
             color: #001712;
             font-weight: 700;
         }
-        QPushButton#reportButton:hover { background-color: #00A28F; }
+        QPushButton#reportButton:hover { background-color: #2A95A6; }
 
         /* --- 5. Input Fields --- */
         QLineEdit, QComboBox {
-            background-color: #1B1D1F;
-            border: 1px solid #34373A;
+            background-color: #002D3A;
+            border: 1px solid #1D4B5E;
             padding: 6px;
             border-radius: 6px;
-            color: #E8E8E8;
+            color: #E0F7FA;
         }
         QLineEdit:focus, QComboBox:focus {
-            border: 1px solid #00BFA5;
+            border: 1px solid #31A3B8; /* Primary Accent focus */
             outline: none;
         }
 
         /* --- 6. Slider (Controls) --- */
-        QSlider::groove:horizontal { height: 6px; background: #2A2C2E; border-radius: 3px; }
+        QSlider::groove:horizontal { height: 6px; background: #1D4B5E; border-radius: 3px; }
         QSlider::handle:horizontal {
-            background: #00BFA5; width: 14px; margin-top: -4px; margin-bottom: -4px; border-radius: 7px; border: 1px solid #0B3A2E;
+            background: #31A3B8; width: 14px; margin-top: -4px; margin-bottom: -4px; border-radius: 7px; border: 1px solid #0B3A2E;
         }
 
         /* Title bar */
         QWidget#TitleBar {
-          background-color: #151718;
-          border-bottom: 1px solid #34373A;
+          background-color: #001B26; /* main background */
+          border-bottom: 1px solid #002D3A; /* subtle thin border */
+          border-top-left-radius: 6px;
+          border-top-right-radius: 6px;
         }
         QLabel#WindowTitle {
-          color: #E8E8E8;
+          color: #E0F7FA;
           font-family: Avenir;
           font-weight: 600;
           font-size: 11pt;
@@ -125,40 +149,25 @@ if __name__ == '__main__':
         }
         QPushButton#TitleButton {
           background: transparent;
-          color: #9AA0A6;
+          color: #B0BEC5; /* control icons */
           border: none;
           padding: 4px;
           border-radius: 4px;
         }
-        QPushButton#TitleButton:hover { background: rgba(255,255,255,0.04); color: #FFFFFF; }
-        QPushButton#TitleButton:pressed { background: rgba(255,255,255,0.06); }
+        QPushButton#TitleButton:hover { background: rgba(255,255,255,0.03); color: #E0F7FA; }
+        QPushButton#TitleButton:pressed { background: rgba(255,255,255,0.05); }
 
         /* Menu bar */
         QMenuBar#MenuBar {
-            background-color: #151718;
-            color: #E8E8E8;
+            background-color: #001B26;
+            color: #E0F7FA;
         }
-        QMenuBar::item {
-            spacing: 6px;
-            padding: 4px 10px;
-            background: transparent;
-            color: #E8E8E8;
-        }
-        QMenuBar::item:selected {
-            background-color: #272A2C;
-            color: #FFFFFF;
-        }
-        QMenu {
-            background-color: #1B1D1F;
-            color: #E8E8E8;
-        }
-        QMenu::item:selected {
-            background-color: #2F4C4F;
-            color: #FFFFFF;
-        }
+        QMenuBar::item:selected { background-color: #002D3A; color: #E0F7FA; }
+        QMenu { background-color: #002D3A; color: #E0F7FA; }
+        QMenu::item:selected { background-color: #1D4B5E; color: #E0F7FA; }
 
         /* --- 7. Video Display --- */
-        QLabel { background-color: #121213; }
+        QLabel { background-color: #001B26; }
 
     """)
     # Instantiate the Main Window
