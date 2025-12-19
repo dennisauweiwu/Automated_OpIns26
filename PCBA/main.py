@@ -151,11 +151,14 @@ if __name__ == '__main__':
           background: transparent;
           color: #B0BEC5; /* control icons */
           border: none;
-          padding: 4px;
-          border-radius: 4px;
+          padding: 6px; /* larger padding for comfortable hit area */
+          border-radius: 6px;
+          min-width: 28px;
+          min-height: 28px;
+          font-size: 11pt; /* ensure glyphs render clearly */
         }
-        QPushButton#TitleButton:hover { background: rgba(255,255,255,0.03); color: #E0F7FA; }
-        QPushButton#TitleButton:pressed { background: rgba(255,255,255,0.05); }
+        QPushButton#TitleButton:hover { background: rgba(255,255,255,0.045); color: #E0F7FA; }
+        QPushButton#TitleButton:pressed { background: rgba(255,255,255,0.07); }
 
         /* Menu bar */
         QMenuBar#MenuBar {

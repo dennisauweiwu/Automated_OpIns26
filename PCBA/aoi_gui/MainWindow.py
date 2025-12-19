@@ -21,12 +21,14 @@ class TitleBar(QWidget):
         super().__init__(parent)
         self.parent = parent
         self.setObjectName('TitleBar')
-        self.setFixedHeight(36)
+        # Slightly taller to avoid border overlap and improve hit area
+        self.setFixedHeight(40)
         # Drag state: set to None until a valid mouse press occurs
         self._drag_pos = None
 
         layout = QHBoxLayout(self)
-        layout.setContentsMargins(8, 0, 8, 0)
+        # Add vertical margins so buttons aren't flush against top/bottom borders
+        layout.setContentsMargins(8, 6, 8, 6)
         layout.setSpacing(8)
 
         self.title = QLabel(parent.windowTitle(), self)
@@ -35,13 +37,13 @@ class TitleBar(QWidget):
         layout.addWidget(self.title)
         layout.addStretch()
 
-        # Title bar buttons
+        # Title bar buttons (larger square buttons for better hit area)
         self.minBtn = QPushButton('_', self)
         self.maxBtn = QPushButton('❐', self)
         self.closeBtn = QPushButton('✕', self)
         for b in (self.minBtn, self.maxBtn, self.closeBtn):
             b.setObjectName('TitleButton')
-            b.setFixedSize(28, 24)
+            b.setFixedSize(30, 30)
             layout.addWidget(b)
 
         self.minBtn.clicked.connect(parent.showMinimized)
