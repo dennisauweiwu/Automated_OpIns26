@@ -9,72 +9,13 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtCore import QThread, pyqtSlot, pyqtSignal, Qt, QPropertyAnimation, QEasingCurve
 from PyQt5.QtGui import QImage, QPixmap
-import cv2 
+import cv2
+from pathlib import Path
+
     
-# Import the new worker classes
-from aoi_gui.WorkerThreads import CameraWorker, AIWorker 
-from aoi_core.HardwareControl import TowerLightController
-from aoi_core.DataPublisher import MQTTPublisher 
-
-class TitleBar(QWidget):
-    def __init__(self, parent):
-        super().__init__(parent)
-        self.parent = parent
-        self.setObjectName('TitleBar')
-        # Slightly taller to avoid border overlap and improve hit area
-        self.setFixedHeight(40)
-        # Drag state: set to None until a valid mouse press occurs
-        self._drag_pos = None
-
-        layout = QHBoxLayout(self)
-        # Add vertical margins so buttons aren't flush against top/bottom borders
-        layout.setContentsMargins(8, 6, 8, 6)
-        layout.setSpacing(8)
-
-        self.title = QLabel(parent.windowTitle(), self)
-        self.title.setObjectName('WindowTitle')
-        self.title.setAlignment(Qt.AlignVCenter | Qt.AlignLeft)
-        layout.addWidget(self.title)
-        layout.addStretch()
-
-        # Title bar buttons (larger square buttons for better hit area)
-        self.minBtn = QPushButton('_', self)
-        self.maxBtn = QPushButton('❐', self)
-        self.closeBtn = QPushButton('✕', self)
-        for b in (self.minBtn, self.maxBtn, self.closeBtn):
-            b.setObjectName('TitleButton')
-            b.setFixedSize(30, 30)
-            layout.addWidget(b)
-
-        self.minBtn.clicked.connect(parent.showMinimized)
-        self.maxBtn.clicked.connect(self._toggle_max)
-        self.closeBtn.clicked.connect(parent.close)
-
-    def mousePressEvent(self, event):
-        if event.button() == Qt.LeftButton:
-            self._drag_pos = event.globalPos() - self.parent.frameGeometry().topLeft()
-            event.accept()
-
-    def mouseMoveEvent(self, event):
-        # Do not move when maximized or when drag hasn't been initialized
-        if event.buttons() == Qt.LeftButton and not self.parent.isMaximized() and self._drag_pos is not None:
-            try:
-                self.parent.move(event.globalPos() - self._drag_pos)
-                event.accept()
-            except Exception:
-                # Defensive: if something unexpected happens, reset drag state
-                self._drag_pos = None
-
-    def mouseDoubleClickEvent(self, event):
-        self._toggle_max()
-
-    def _toggle_max(self):
-        if self.parent.isMaximized():
-            self.parent.showNormal()
-            self.maxBtn.setText('❐')
-        else:
-            self.parent.showMaximized()
-            self.maxBtn.setText('❐')
+from aoi_gui.Components import TitleBar
+from aoi_gui.Controller import Controller
+from PyQt5.QtWidgets import QApplication
 
 
 class MainWindow(QMainWindow):
@@ -84,6 +25,8 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Op-Ins AOI System")
+        # Track current theme: 'dark' (default) or 'light'
+        self.current_theme = 'dark'
         self.init_ui()
         self.init_threads() 
 
@@ -91,6 +34,12 @@ class MainWindow(QMainWindow):
         # Setting Window Size and Title
         self.setWindowTitle("Op-Ins 2601 - GUI Development Mode")
         self.setGeometry(100, 100, 1200, 800)
+
+        # Load centralized stylesheet (if available)
+        try:
+            self._load_stylesheet()
+        except Exception:
+            pass
 
         # Use frameless window and insert a custom title bar so it matches the theme
         self.setWindowFlag(Qt.FramelessWindowHint)
@@ -122,15 +71,15 @@ class MainWindow(QMainWindow):
 
         # 1. Video Display Area (Large Left Side)
         self.video_label = QLabel("Waiting for Camera Feed...")
+        self.video_label.setObjectName('VideoLabel')
         self.video_label.setAlignment(Qt.AlignCenter)
-        self.video_label.setStyleSheet("background-color: #222; color: #EEE; border: 1px solid gray;")
-        
         # Responsive Design Configuration
         self.video_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding) # Use QSizePolicy here
         self.video_label.setMinimumSize(400, 300)
         # Do not call setScaledContents(True) — we scale and letterbox frames explicitly to preserve aspect ratio
 
-        main_layout.addWidget(self.video_label, 3) 
+        main_layout.addWidget(self.video_label, 3)
+
 
         # 2. Control & Status Sidebar (Right Side)
         sidebar_widget = QWidget()
@@ -140,23 +89,11 @@ class MainWindow(QMainWindow):
         # --- Sidebar Components ---
         sidebar_layout.addWidget(self._create_stats_group())
         sidebar_layout.addWidget(self._create_control_group())
+        sidebar_layout.addWidget(self._create_action_buttons())
 
-        # C. Reporting & Action Buttons
-        self.report_button = QPushButton("Export Report (.xlsx)")
-        self.report_button.setObjectName("reportButton")
-        # Use minimum height to avoid vertical clipping of text descenders
-        self.report_button.setMinimumHeight(44)
-        sidebar_layout.addWidget(self.report_button)
-
-        # New action: Capture & Analyze (placed beneath Export)
-        self.capture_button = QPushButton("Capture and Analyze")
-        self.capture_button.setObjectName("captureButton")
-        self.capture_button.setMinimumHeight(44)
-        self.capture_button.clicked.connect(self._on_capture_and_analyze)
-        sidebar_layout.addWidget(self.capture_button)
-        
         # Spacer
-        sidebar_layout.addStretch(1) 
+        sidebar_layout.addStretch(1)
+
         
         self.setStatusBar(QStatusBar(self))
 
@@ -166,7 +103,7 @@ class MainWindow(QMainWindow):
         self.statusBar().showMessage("Capture & Analyze triggered (mock)", 3000)
 
     def _create_stats_group(self):
-        stats_group = QGroupBox("Inspection Statistics")
+        stats_group = QGroupBox("Inspection Report")
         main_layout = QVBoxLayout()
         main_layout.setContentsMargins(12, 12, 12, 12)
         main_layout.setSpacing(8)
@@ -222,36 +159,55 @@ class MainWindow(QMainWindow):
         control_group.setLayout(layout)
         return control_group
 
+    def _create_action_buttons(self):
+        """Factory: Create a compact widget that contains the report and capture buttons."""
+        w = QWidget()
+        v = QVBoxLayout(w)
+        v.setContentsMargins(6, 6, 6, 6)
+        v.setSpacing(8)
+
+        self.report_button = QPushButton("Export Report (.xlsx)")
+        self.report_button.setObjectName("reportButton")
+        self.report_button.setMinimumHeight(44)
+        # Make the report button act like the Capture button for now (placeholder behavior)
+        self.report_button.setEnabled(True)
+        self.report_button.clicked.connect(self._on_capture_and_analyze)
+        v.addWidget(self.report_button)
+
+        self.capture_button = QPushButton("Capture and Analyze")
+        self.capture_button.setObjectName("captureButton")
+        self.capture_button.setMinimumHeight(44)
+        self.capture_button.clicked.connect(self._on_capture_and_analyze)
+        v.addWidget(self.capture_button)
+
+        return w
+
     def init_threads(self):
-        # 1. --- Camera Thread Setup ---
-        self.cam_thread = QThread()
-        self.cam_worker = CameraWorker(camera_index=0) 
-        self.cam_worker.moveToThread(self.cam_thread)
+        """Create and start the Controller which owns threads and hardware interfaces.
+        Keep only GUI-related signal connections here (status & result callbacks).
+        """
+        # Instantiate controller and start
+        self.controller = Controller(camera_index=0, tower_port='COM3')
 
-        # 2. --- AI Thread Setup ---
-        self.ai_thread = QThread()
-        self.ai_worker = AIWorker() 
-        self.ai_worker.moveToThread(self.ai_thread)
-        
-        # 3. --- Hardware Controller Setup ---
-        self.tower_controller = TowerLightController(port='COM3') 
-        self.mqtt_publisher = MQTTPublisher()
+        # Connect worker status signals to the main window status bar
+        try:
+            self.controller.cam_worker.status_signal.connect(self.statusBar().showMessage)
+        except Exception:
+            pass
+        try:
+            self.controller.ai_worker.status_signal.connect(self.statusBar().showMessage)
+        except Exception:
+            pass
+        try:
+            self.controller.tower_controller.status_signal.connect(self.statusBar().showMessage)
+        except Exception:
+            pass
 
-        # 4. --- Signal Connections ---
-        self.cam_worker.status_signal.connect(self.statusBar().showMessage)
-        self.ai_worker.status_signal.connect(self.statusBar().showMessage)
-        self.tower_controller.status_signal.connect(self.statusBar().showMessage)
+        # Connect AI detection results to GUI
+        self.controller.ai_worker.detection_ready.connect(self.update_results_slot)
 
-        self.cam_worker.frame_ready.connect(self.ai_worker.process_frame)
-        self.ai_worker.detection_ready.connect(self.update_results_slot)
-
-        # C. Thread Control
-        self.cam_thread.started.connect(self.cam_worker.run)
-        self.ai_thread.started.connect(lambda: self.statusBar().showMessage("AI Thread Started."))
-        
-        # 5. --- Start Threads ---
-        self.cam_thread.start()
-        self.ai_thread.start()
+        # Start controller-managed threads
+        self.controller.start()
         
     @pyqtSlot(np.ndarray, dict)
     def update_results_slot(self, annotated_img: np.ndarray, stats_dict: dict):
@@ -275,10 +231,16 @@ class MainWindow(QMainWindow):
 
         # (style applied during animation) 
 
-        # 4. Hardware and Communication
-        self.tower_controller.set_status(is_pcba_pass) 
+        # 4. Hardware and Communication (delegated to controller)
+        try:
+            self.controller.tower_controller.set_status(is_pcba_pass)
+        except Exception:
+            pass
         if not is_pcba_pass:
-            self.mqtt_publisher.publish_alert(stats_dict) 
+            try:
+                self.controller.mqtt_publisher.publish_alert(stats_dict)
+            except Exception:
+                pass
 
         # 5. Display Image (Responsive Video Display)
         target_size = self.video_label.size()
@@ -344,6 +306,59 @@ class MainWindow(QMainWindow):
         self._fade_in.setEndValue(1.0)
         self._fade_in.setEasingCurve(QEasingCurve.InOutQuad)
 
+    def _load_stylesheet(self):
+        """Load `ui/style.qss` if present and **only apply it** when the application has no stylesheet.
+
+        This avoids duplicating rules when `main.py` already loaded the theme at startup.
+        """
+        app = QApplication.instance()
+        if app is None:
+            return
+
+        # If the application already has a stylesheet, we assume `main.py` loaded it and skip.
+        if app.styleSheet().strip():
+            return
+
+        qss_path = Path(__file__).resolve().parents[1] / 'ui' / 'style.qss'
+        if qss_path.exists():
+            try:
+                with open(qss_path, 'r', encoding='utf-8') as fh:
+                    app.setStyleSheet(fh.read())
+            except Exception:
+                pass
+
+    def toggle_theme(self):
+        """Switch between dark and light theme by loading the appropriate QSS file."""
+        app = QApplication.instance()
+        if app is None:
+            return
+
+        base = Path(__file__).resolve().parents[1] / 'ui'
+        dark_path = base / 'style.qss'
+        light_path = base / 'style_light.qss'
+
+        try:
+            if self.current_theme == 'dark':
+                if light_path.exists():
+                    with open(light_path, 'r', encoding='utf-8') as fh:
+                        app.setStyleSheet(fh.read())
+                    self.current_theme = 'light'
+                    try:
+                        self.title_bar.themeBtn.setText('🌙')
+                    except Exception:
+                        pass
+            else:
+                if dark_path.exists():
+                    with open(dark_path, 'r', encoding='utf-8') as fh:
+                        app.setStyleSheet(fh.read())
+                    self.current_theme = 'dark'
+                    try:
+                        self.title_bar.themeBtn.setText('☀')
+                    except Exception:
+                        pass
+        except Exception:
+            pass
+
     def _animate_status_change(self, text: str, prop: str):
         """Animate fade out, update status text/property, then fade in."""
         # Skip if nothing to change
@@ -375,14 +390,8 @@ class MainWindow(QMainWindow):
 
     def closeEvent(self, event):
         """Ensure all threads and connections stop cleanly when the main window is closed."""
-        # Clean up worker threads
-        self.cam_worker.stop()
-        self.cam_thread.quit()
-        self.cam_thread.wait()
-        self.ai_thread.quit()
-        self.ai_thread.wait()
-        
-        # Clean up connections
-        self.tower_controller.close()
-        self.mqtt_publisher.close()
+        try:
+            self.controller.stop()
+        except Exception:
+            pass
         event.accept()

@@ -1,0 +1,160 @@
+/* ui/style.qss - Complete UI theme (Deep Sapphire)
+   This contains the base theme (colors, fonts, spacings) and component styles.
+*/
+
+/* --- 1. Base Widget (Global) --- */
+/* Main Background: Deep Navy (#0F172A) */
+QWidget {
+    background-color: #0F172A;
+    color: #F1F5F9;            /* Primary text: Cool White */
+    font-family: Avenir;
+    font-size: 10pt;
+}
+
+/* --- 2. QGroupBox (Container Styles) --- */
+/* Secondary Surface: Slate Blue (#1E293B) */
+QGroupBox {
+    border: 1px solid #334155; /* Blue-grey border */
+    border-radius: 6px; 
+    margin-top: 25px;
+    padding: 12px; 
+    padding-top: 18px; 
+    font-weight: normal;
+    background-color: #1E293B;
+}
+QGroupBox::title {
+    subcontrol-origin: margin;
+    subcontrol-position: top left;
+    padding: 0 8px;
+    color: #94A3B8; /* Muted Slate text */
+    font-size: 9pt;
+}
+
+/* Ensure consistent rounded corners on common controls */
+QPushButton, QLineEdit, QComboBox {
+    border-radius: 6px;
+}
+
+/* Small padding for labels */
+QLabel {
+    padding: 2px 6px 2px 6px;
+}
+
+/* --- 3. QLabel#StatusIndicator --- */
+QLabel#StatusIndicator {
+    font-size: 18pt;
+    font-weight: bold;
+    color: #F1F5F9;
+    padding: 8px 12px;
+    border: 1px solid #334155; 
+    border-radius: 6px;
+    background-color: #1E293B;
+    min-width: 140px;
+}
+
+/* Utility states for programmatic toggling via QLabel[status="..."] */
+QLabel#StatusIndicator[status="loading"] {
+    color: #94A3B8;
+    background-color: #1E293B;
+    border-color: #334155;
+}
+/* Success Green (Slightly cooler tone than original) */
+QLabel#StatusIndicator[status="pass"] {
+    color: #0F172A;
+    background-color: #4ADE80; /* Bright Tech Green */
+    border-color: #22c55e;
+}
+/* Error Red (Slightly cooler/pinker tone) */
+QLabel#StatusIndicator[status="fail"] {
+    color: #F1F5F9;
+    background-color: #F87171; /* Soft Red */
+    border-color: #EF4444;
+}
+
+/* --- 4. QPushButton (Interactive Elements) --- */
+/* Default buttons use Secondary Surface */
+QPushButton {
+    background-color: #1E293B;
+    border: 1px solid #475569; /* Secondary Accent: Slate */
+    color: #F1F5F9;
+    padding: 12px 14px; 
+    border-radius: 6px;
+    min-width: 80px;
+    min-height: 44px; 
+    font-weight: 500;
+}
+
+/* ensure labels have enough vertical padding for descenders */
+QLabel {
+    padding: 4px 6px;
+}
+QPushButton:hover {
+    background-color: #3B82F6; /* Primary Accent: Royal Blue */
+    border-color: #3B82F6;
+    color: #FFFFFF;            /* White text on Blue */
+}
+QPushButton:pressed {
+    background-color: #2563EB; /* Darker Royal Blue */
+    border-color: #1E293B;
+    color: #FFFFFF;
+}
+
+/* --- 5. Input Fields --- */
+QLineEdit, QComboBox {
+    background-color: #1E293B;
+    border: 1px solid #475569;
+    padding: 6px;
+    border-radius: 6px;
+    color: #F1F5F9;
+}
+QLineEdit:focus, QComboBox:focus {
+    border: 1px solid #3B82F6; /* Primary Accent focus */
+    outline: none;
+}
+
+/* --- 6. Slider (Controls) --- */
+QSlider::groove:horizontal { height: 6px; background: #475569; border-radius: 3px; }
+QSlider::handle:horizontal {
+    background: #3B82F6; width: 14px; margin-top: -4px; margin-bottom: -4px; border-radius: 7px; border: 1px solid #1E293B;
+}
+
+/* Title bar */
+QWidget#TitleBar {
+  background-color: #0F172A; /* main background */
+  border-bottom: 1px solid #1E293B; 
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
+}
+QLabel#WindowTitle {
+  color: #F1F5F9;
+  font-family: Avenir;
+  font-weight: 600;
+  font-size: 11pt;
+  padding-left: 6px;
+}
+QPushButton#TitleButton {
+  background: transparent;
+  color: #94A3B8; /* control icons */
+  border: none;
+  padding: 6px; 
+  border-radius: 6px;
+  min-width: 28px;
+  min-height: 28px;
+  font-size: 11pt; 
+}
+QPushButton#TitleButton:hover { background: rgba(255,255,255,0.08); color: #F1F5F9; }
+QPushButton#TitleButton:pressed { background: rgba(255,255,255,0.12); }
+
+/* Menu bar */
+QMenuBar#MenuBar {
+    background-color: #0F172A;
+    color: #F1F5F9;
+}
+QMenuBar::item:selected { background-color: #1E293B; color: #F1F5F9; }
+QMenu { background-color: #1E293B; color: #F1F5F9; }
+QMenu::item:selected { background-color: #3B82F6; color: #FFFFFF; }
+
+/* --- 7. Video Display --- */
+#VideoLabel {
+    border: 1px solid #475569;
+}
