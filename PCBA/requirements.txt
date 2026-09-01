@@ -1,0 +1,31 @@
+# ---- Core GUI (required) ----------------------------------------------------
+PyQt5>=5.15.9
+numpy>=1.24
+opencv-python>=4.8.0
+
+# ---- Reporting (recommended) ------------------------------------------------
+# Without openpyxl the export button silently degrades to .csv.
+openpyxl>=3.1
+
+# ---- Metrics (recommended) --------------------------------------------------
+# Without psutil the CPU/RAM columns report -1 and the comparison loses two
+# of its four dimensions.
+psutil>=5.9
+# GPU utilisation + VRAM. Nvidia only; harmless to omit.
+nvidia-ml-py>=12.535
+
+# ---- Test Path A: Python engine --------------------------------------------
+# Skip these if you only intend to run the simulation or C++ backends.
+ultralytics>=8.2.0
+# Install torch matching your CUDA version FIRST, from pytorch.org, e.g.:
+#   pip install torch torchvision --index-url https://download.pytorch.org/whl/cu121
+torch>=2.1.0
+
+# ---- Test Path B: C++ engine build -----------------------------------------
+# Build-time only; the GUI imports the compiled yolo_backend_cpp.pyd.
+pybind11>=2.11
+
+# ---- Hardware (optional) ----------------------------------------------------
+# Both degrade to no-ops with a status message if absent.
+pyserial>=3.5
+paho-mqtt>=1.6

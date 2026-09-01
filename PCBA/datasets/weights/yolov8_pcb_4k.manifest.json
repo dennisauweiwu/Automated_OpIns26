@@ -1,0 +1,13 @@
+{
+  "pt": "C:\\Users\\denni\\Downloads\\Automated_OpIns-Ver-0.1 - Copy\\Automated_OpIns-Ver-0.1\\PCBA\\datasets\\weights\\yolov8_pcb_4k.pt",
+  "pt_sha256": "a0c6de27a3d69b1aefeb41cb857699369dd722711cc52a351c989b7fc2c6d7eb",
+  "onnx": "C:\\Users\\denni\\Downloads\\Automated_OpIns-Ver-0.1 - Copy\\Automated_OpIns-Ver-0.1\\PCBA\\datasets\\weights\\yolov8_pcb_4k.onnx",
+  "onnx_sha256": "40af941e181a8b744536c8cfe8c58839894855a47fd060d9fa77a56b2af0c22d",
+  "imgsz": 640,
+  "opset": 12,
+  "class_names": [
+    "Irregular",
+    "Sphere",
+    "Quadrilateral"
+  ]
+}
