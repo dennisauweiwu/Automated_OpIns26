@@ -1,0 +1,29 @@
+# ---- Core (required) --------------------------------------------------------
+PyQt5>=5.15.9
+numpy>=1.24
+opencv-python>=4.8.0
+
+# ---- Reporting --------------------------------------------------------------
+# openpyxl: multi-sheet study workbook. Without it, exports degrade to CSV.
+openpyxl>=3.1
+# matplotlib: the publication figures (300 dpi PNG + vector PDF). Without it the
+# workbook is still written; only the figures are skipped.
+matplotlib>=3.7
+
+# ---- Metrics ----------------------------------------------------------------
+# psutil: CPU and RSS. Without it those columns report -1 and the comparison
+# loses two of its four dimensions.
+psutil>=5.9
+# GPU utilisation and VRAM. Nvidia only; harmless to omit.
+nvidia-ml-py>=12.535
+
+# ---- Test Path A ------------------------------------------------------------
+# Skip if you only intend to run the simulation or the C++ path.
+ultralytics>=8.2.0
+# Install torch matching your CUDA version FIRST, from pytorch.org, e.g.:
+#   pip install torch torchvision --index-url https://download.pytorch.org/whl/cu121
+torch>=2.1.0
+
+# ---- Test Path B build ------------------------------------------------------
+# Build-time only; at run time the GUI imports the compiled aoi_engine_cpp.
+pybind11>=2.11
