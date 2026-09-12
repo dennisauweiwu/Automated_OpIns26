@@ -1,0 +1,17 @@
+{
+  "exported": "2026-09-09 21:37:42",
+  "pt": "C:\\Users\\denni\\Downloads\\Op-Ins-1.5\\Op-Ins\\PCBA\\datasets\\weights\\yolov8_pcb_4k.pt",
+  "pt_sha256": "ee3669d050a375665774cd55155cb60f19c3929c456e595accb6bfb1716bfa2a",
+  "onnx": "C:\\Users\\denni\\Downloads\\Op-Ins-1.5\\Op-Ins\\PCBA\\datasets\\weights\\yolov8_pcb_4k.onnx",
+  "onnx_sha256": "7a5b96cd98df07a6fec30795c3a0a1773b6cfb5733ef1a0589e0e160cd6fedf3",
+  "imgsz": 640,
+  "opset": 12,
+  "class_names": [
+    "mouse_bite",
+    "spur",
+    "missing_hole",
+    "short",
+    "open_circuit",
+    "spurious_copper"
+  ]
+}
